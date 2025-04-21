@@ -2,14 +2,18 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
-from keras import Sequential
-from keras import layers
+# from keras import Sequential
+# from keras import layers
 import tensorflow as tf
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense
 from tensorflow.keras.utils import to_categorical
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
+
+
+#import tensorflow as tf
+print(tf.__version__)
 
 
 
@@ -20,12 +24,15 @@ from sklearn.preprocessing import StandardScaler
 dataFrame = pd.read_csv('eyetracking_data.csv')
 
 #separate features from classifications
-dimensions = dataFrame[["mu_fixation","tau_fixation","mu_saccade_amp","tau_saccade_amp","mu_saccade_dur","tau_sacade_dur","mu_fixation_num","tau_fixation_num","mu_saccade_num","tau_saccade_num","mu_blink_num","tau_blink_num","mu_response_time","tau_response_time","mu_correct","tau_correct"]]
+dimensions = dataFrame[["mu_fixation","tau_fixation","mu_saccade_amp","tau_saccade_amp","mu_saccade_dur","tau_saccade_dur","mu_fixation_num","tau_fixation_num","mu_saccade_num","tau_saccade_num","mu_blink_num","tau_blink_num","mu_response_time","tau_response_time","mu_correct","tau_correct"]]
 #defined using one hot encoding
-classes = pd.get_dummies(dataFrame[['CL_level']])
+classes = pd.get_dummies(dataFrame['CL_level'])
+scaler = StandardScaler()
+features = scaler.fit_transform(dimensions)
+
 
 #create test and train sets
-trainingFeatures, testFeatures, trainingClass, testClass = train_test_split(dimensions, classes, test_size = .2, train_size=.8)
+trainingFeatures, testFeatures, trainingClass, testClass = train_test_split(features, classes, test_size = .2, train_size=.8)
 
 
 #model creation
@@ -36,15 +43,20 @@ model = Sequential()
 #activation = activation function
 
 #hidden layer, 4 nodes, chosen by me
-model.add(Dense(units = 4, activation = 'tanh'))
+# model.add(Dense(units = 4, activation = 'tanh'))
 
 #output layer, 3 nodes, 1 for probability of each class
-model.add(Dense(units = 3, activation = 'softmax'))
+# model.add(Dense(units = 3, activation = 'softmax'))
+
+
+model.add(Dense(8, activation='relu', input_shape=(trainingFeatures.shape[1],)))
+model.add(Dense(3, activation='softmax'))
+
 
 #metrics is just the information we want to know, in this case, how accurate the model is
 #optimizer is gradient descent 
 #loss is the error funciton: what you are trying to minimize// i use mean squared error from class
-model.compile(optimizer = 'SGD', loss = 'mean_squared_error', metrics= ['accuracy'])
+model.compile(optimizer = 'SGD', loss = 'categorical_crossentropy', metrics= ['accuracy'])
 
 def graphLosses(loss):
     plt.figure(figsize=(8, 6))
@@ -60,7 +72,7 @@ def runTraining(model):
     #train the model
     #epochs = how many times it is trained// An epoch is an iteration over the entire x and y data provided
     #batch_size = how many points are passed in on each round (Number of samples per gradient update)
-    return model.fit(trainingFeatures, trainingClass, epochs = 25, batch_size=5)
+    return model.fit(trainingFeatures, trainingClass, epochs=25, batch_size=5, validation_split=0.2)
 
 
 
