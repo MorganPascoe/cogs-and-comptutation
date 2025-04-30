@@ -20,7 +20,7 @@ dataFrame = pd.read_csv('eyetracking_data.csv')
 #dimensions = dataFrame[["mu_fixation","tau_fixation","mu_saccade_amp","tau_saccade_amp","mu_saccade_dur","tau_saccade_dur","mu_fixation_num","tau_fixation_num","mu_saccade_num","tau_saccade_num","mu_blink_num","tau_blink_num"]]
 
 #no eye
-dimensions = dataFrame[["mu_response_time","tau_response_time","mu_correct","tau_correct"]]
+#dimensions = dataFrame[["mu_response_time","tau_response_time","mu_correct","tau_correct"]]
 
 #only mu
 #dimensions = dataFrame[["mu_fixation","mu_saccade_amp","mu_saccade_dur","mu_fixation_num","mu_saccade_num","mu_blink_num","mu_response_time","mu_correct"]]
@@ -29,7 +29,7 @@ dimensions = dataFrame[["mu_response_time","tau_response_time","mu_correct","tau
 #dimensions = dataFrame[["tau_fixation","tau_saccade_amp","tau_saccade_dur","tau_fixation_num","tau_saccade_num","tau_blink_num","tau_response_time","tau_correct"]]
 
 #top 8 important
-#dimensions = dataFrame[["tau_fixation","mu_saccade_amp","tau_saccade_amp","mu_saccade_num","mu_blink_num","mu_response_time","mu_correct","tau_correct"]]
+dimensions = dataFrame[["tau_fixation","mu_saccade_amp","tau_saccade_amp","mu_saccade_num","mu_blink_num","mu_response_time","mu_correct","tau_correct"]]
 
 
 feature_names = dimensions.columns
