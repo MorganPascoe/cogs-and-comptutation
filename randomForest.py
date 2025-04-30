@@ -4,9 +4,10 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report
 from sklearn.metrics import accuracy_score
+from sklearn.ensemble import RandomForestClassifier
+
 
 
 
@@ -19,7 +20,7 @@ dataFrame = pd.read_csv('eyetracking_data.csv')
 #dimensions = dataFrame[["mu_fixation","tau_fixation","mu_saccade_amp","tau_saccade_amp","mu_saccade_dur","tau_saccade_dur","mu_fixation_num","tau_fixation_num","mu_saccade_num","tau_saccade_num","mu_blink_num","tau_blink_num"]]
 
 #no eye
-#dimensions = dataFrame[["mu_response_time","tau_response_time","mu_correct","tau_correct"]]
+dimensions = dataFrame[["mu_response_time","tau_response_time","mu_correct","tau_correct"]]
 
 #only mu
 #dimensions = dataFrame[["mu_fixation","mu_saccade_amp","mu_saccade_dur","mu_fixation_num","mu_saccade_num","mu_blink_num","mu_response_time","mu_correct"]]
@@ -28,23 +29,18 @@ dataFrame = pd.read_csv('eyetracking_data.csv')
 #dimensions = dataFrame[["tau_fixation","tau_saccade_amp","tau_saccade_dur","tau_fixation_num","tau_saccade_num","tau_blink_num","tau_response_time","tau_correct"]]
 
 #top 8 important
-dimensions = dataFrame[["tau_fixation","mu_saccade_amp","tau_saccade_amp","mu_saccade_num","mu_blink_num","mu_response_time","mu_correct","tau_correct"]]
+#dimensions = dataFrame[["tau_fixation","mu_saccade_amp","tau_saccade_amp","mu_saccade_num","mu_blink_num","mu_response_time","mu_correct","tau_correct"]]
 
 
 feature_names = dimensions.columns
 n_features = len(feature_names)
 n_classes = 3
-n_runs = 1000
 
-# Accumulate absolute coefficients
-coef_sums = np.zeros((n_classes, n_features))
-
-abs_coef_sums = np.zeros((n_classes, n_features))
 
 
 scaler = StandardScaler()
 features = scaler.fit_transform(dimensions)
-labels = dataFrame['CL_level'] - 1 # integers: 0, 1, 2
+labels = dataFrame['CL_level']  # integers: 1, 2, 3
 accuracies = []
 precisions1 = []
 precisions2 = []
@@ -56,13 +52,11 @@ recalls3 = []
 
 
 
-#run through 1000 times
-for _ in range(1000):
+for _ in range(500):
     X_train, X_test, y_train, y_test = train_test_split(features, labels, test_size=0.2)
 
-    #create model
-    model = log_reg = LogisticRegression(max_iter=200)
-    #run regression
+    model = RandomForestClassifier(n_estimators=100, random_state=42)
+
     model.fit(X_train, y_train)
     preds = model.predict(X_test)
 
@@ -72,41 +66,19 @@ for _ in range(1000):
     accuracies.append(acc)
 
 
-    precisions1.append(report['0']['precision'])
-    precisions2.append(report['1']['precision'])
-    precisions3.append(report['2']['precision'])
-    recalls1.append(report['0']['recall'])
-    recalls2.append(report['1']['recall'])
-    recalls3.append(report['2']['recall'])
-
-    coefs = (model.coef_)
-    abscoefs = np.abs(model.coef_)
-    abs_coef_sums += abscoefs
-    coef_sums += coefs
-
-# Average over all runs
-avg_coefs = coef_sums / 1000
-abs_avg_coefs = abs_coef_sums/1000
-
-# Compute average across all classes (mean importance per feature)
-mean_feature_importance = np.mean(abs_avg_coefs, axis=0)
-class_labels = [0, 1, 2]  
-
-coef_df = pd.DataFrame(avg_coefs.T, columns=class_labels, index=feature_names)
-print("\nAverage Coefficients by Class:")
-print(coef_df)
+    precisions1.append(report['1']['precision'])
+    precisions2.append(report['2']['precision'])
+    precisions3.append(report['3']['precision'])
+    recalls1.append(report['1']['recall'])
+    recalls2.append(report['2']['recall'])
+    recalls3.append(report['3']['recall'])
 
 
-# Sort and display
-sorted_indices = np.argsort(mean_feature_importance)[::-1]
-print("\nAverage Feature Importance (over all classes and runs):")
-for idx in sorted_indices:
-     print(f"{feature_names[idx]:30s}: {mean_feature_importance[idx]:.6f}")
 
 
 
 # Report average metrics
-print(f"\nAverage over 1000 runs:")
+print(f"\nAverage over 500 runs:")
 print(f"Accuracy: {np.mean(accuracies):.4f}")
 print(f"Precision low load: {np.mean(precisions1):.4f}")
 print(f"Precision med load: {np.mean(precisions2):.4f}")
@@ -114,7 +86,6 @@ print(f"Precision high load: {np.mean(precisions3):.4f}")
 print(f"Recall low load: {np.mean(recalls1):.4f}")
 print(f"Recall med load: {np.mean(recalls2):.4f}")
 print(f"Recall high load: {np.mean(recalls3):.4f}")
-
 
 
 

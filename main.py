@@ -39,23 +39,16 @@ trainingFeatures, testFeatures, trainingClass, testClass = train_test_split(feat
 #Sequential neural network
 model = Sequential()
 
-#represents the 2 layers of the NN
-#activation = activation function
-
-#hidden layer, 4 nodes, chosen by me
-# model.add(Dense(units = 4, activation = 'tanh'))
-
-#output layer, 3 nodes, 1 for probability of each class
-# model.add(Dense(units = 3, activation = 'softmax'))
-
-
+#layers of the network
 model.add(Dense(8, activation='relu', input_shape=(trainingFeatures.shape[1],)))
+model.add(Dense(units = 4, activation = 'softmax'))
+
 model.add(Dense(3, activation='softmax'))
 
 
 #metrics is just the information we want to know, in this case, how accurate the model is
 #optimizer is gradient descent 
-#loss is the error funciton: what you are trying to minimize// i use mean squared error from class
+#loss is the error funciton: what you are trying to minimize
 model.compile(optimizer = 'SGD', loss = 'categorical_crossentropy', metrics= ['accuracy'])
 
 def graphLosses(loss):
@@ -75,7 +68,6 @@ def runTraining(model):
     return model.fit(trainingFeatures, trainingClass, epochs=25, batch_size=5, validation_split=0.2)
 
 
-
 #graph the loss of each iteration
 losses = runTraining(model).history['loss']
 
@@ -83,12 +75,9 @@ losses = runTraining(model).history['loss']
 
 #how it performs on the test set
 #returns the loss valuve and the metrics we defined above
-#
-
 print("now evaluate test")
 score = model.evaluate(testFeatures, testClass)
 
-#graph the loss of each iteration??
 
 print(score)
 
